@@ -74,6 +74,33 @@ The package is created on the first push and is private by default; make it
 public under the package settings if Prometheus hosts pull it without
 `docker login`.
 
+## Grafana dashboard
+
+`grafana/ttn-gateway-dashboard.json` (uid `ttn-gateway`, schema 39, tested on
+Grafana 12 with Prometheus 3).
+
+Import: Grafana → Dashboards → New → Import → upload the JSON. No datasource
+mapping is asked: the dashboard has a `Data source` variable (any Prometheus
+datasource) and a `Gateway` variable (multi-select, from `gateway_id`).
+For file provisioning, place the JSON in a dashboards provider directory.
+
+Rows and panels:
+
+- **Overview**: stream connected, seconds since last uplink and last status
+  report, uplinks/min, CRC success over 1 h, PUSH_ACK ratio, distinct devices.
+- **Uplink traffic**: uplinks/min by type, by SF and by channel; channel usage
+  and SF mix over the selected range.
+- **Radio quality**: RSSI, SNR and SNR-margin heatmaps; median RSSI and
+  median margin per SF (estimated from 5 dB / 2.5 dB buckets); share of
+  uplinks with margin below 3 dB.
+- **Gateway status counters**: rxin/rxok/rxfw/txin/txok per minute; CRC
+  success, forwarded and PUSH_ACK ratios.
+- **Downlinks and frame integrity**: downlinks per hour by source and type,
+  exact-frame repeats and FCnt gaps per hour, exporter stream health.
+
+Rates use `$__rate_interval`; set the Prometheus datasource's scrape interval
+to the real one (e.g. 30 s) so short ranges are not empty.
+
 ## Metrics
 
 Every series carries `gateway_id`.
